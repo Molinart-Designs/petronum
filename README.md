@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PetMind AI · Frontend (Next.js)
 
-## Getting Started
+Web app para **PetMind AI**: asistente de cuidado de perros con respuestas fundamentadas, confianza, fuentes, disclaimers y aviso de seguimiento veterinario. Autenticación con **Auth0 Universal Login**; las llamadas al FastAPI pasan por un **BFF** en Next que adjunta `Authorization: Bearer` en el servidor (el access token no se expone al navegador).
 
-First, run the development server:
+## Backend (endpoints existentes)
+
+| Método | Ruta | Uso |
+|--------|------|-----|
+| GET | `/api/v1/health` | Público |
+| POST | `/api/v1/query` | Usuario autenticado |
+| POST | `/api/v1/ingest` | Admin (UI + BFF comprueban rol; la API valida el token) |
+
+No se añaden rutas nuevas al backend FastAPI. El prefijo `/api/petmind/*` en Next es un **proxy** hacia esas mismas rutas.
+
+## Variables de entorno
+
+Copia `.env.local.example` a `.env.local` y rellena valores reales.
+
+**Públicas (`NEXT_PUBLIC_*`)**: dominio Auth0, client ID, audience, URL base del API (referencia en UI).
+
+**Solo servidor**: `AUTH0_CLIENT_SECRET`, `AUTH0_SECRET`. No uses el prefijo `NEXT_PUBLIC_` en secretos.
+
+**Auth0 Dashboard** (desarrollo): añade `http://localhost:3000/auth/callback` en *Allowed Callback URLs* y `http://localhost:3000` en *Allowed Logout URLs*.
+
+## Scripts
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Estructura relevante
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+proxy.ts                 # Next 16: Auth0 en el límite de red
+lib/auth0.ts             # Auth0Client
+lib/server-env.ts        # URL del FastAPI (solo servidor)
+lib/env.ts               # Config segura para cliente + prefijo BFF
+lib/auth/roles.ts        # Rol admin (claim configurable)
+lib/api/                 # Cliente fetch → /api/petmind/...
+app/api/petmind/[[...path]]/route.ts   # BFF + Bearer
+app/page.tsx             # Landing
+app/health/page.tsx      # Estado (público)
+app/app/layout.tsx       # Protege /app/*
+app/app/dashboard/
+app/app/ask/
+app/app/profile/
+app/app/admin/ingest/
+components/ask/          # Consulta + panel de respuesta
+components/pet-profile/
+components/ingest/
+components/layout/site-header.tsx
+providers/
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Flujo de auth (resumen)
 
-## Learn More
+1. El usuario visita `/auth/login` o signup (`screen_hint=signup`).
+2. Auth0 Universal Login completa el flujo y devuelve a `/auth/callback`.
+3. La sesión queda en cookies httpOnly cifradas (`AUTH0_SECRET`).
+4. Las rutas bajo `/app/*` exigen sesión; si no hay, redirección a `/auth/login`.
+5. El cliente llama a `/api/petmind/api/v1/...`; el Route Handler obtiene el access token con `getAccessToken(req, res)` y reenvía al FastAPI con `Authorization: Bearer`.
 
-To learn more about Next.js, take a look at the following resources:
+## Roles admin
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Por defecto se buscan roles `admin` / `administrator` en el claim `NEXT_PUBLIC_AUTH0_ROLES_CLAIM` (default `https://petmind.ai/roles`) o en `https://auth0.com/roles`. Ajusta el claim a cómo expongas roles en el ID token (Actions / RBAC).

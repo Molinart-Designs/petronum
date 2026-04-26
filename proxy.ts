@@ -1,0 +1,17 @@
+import type { NextRequest } from "next/server";
+
+import { auth0 } from "@/lib/auth0";
+
+/**
+ * Next.js 16: frontera de red para Auth0 (sesión, `/auth/*`, cookies).
+ * @see https://github.com/auth0/nextjs-auth0
+ */
+export async function proxy(request: NextRequest) {
+  return auth0.middleware(request);
+}
+
+export const config = {
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
+};
