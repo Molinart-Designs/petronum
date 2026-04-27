@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, BookOpen, ShieldAlert } from "lucide-react";
+import { AlertCircle, ShieldAlert } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -64,32 +64,6 @@ export function QueryResponsePanel({ data }: { data: QueryResponse }) {
                     ))}
                   </ul>
                 </div>
-              </div>
-            </>
-          ) : null}
-
-          {data.sources?.length ? (
-            <>
-              <Separator />
-              <div className="space-y-2">
-                <p className="flex items-center gap-2 text-sm font-medium">
-                  <BookOpen className="size-4" aria-hidden />
-                  Fuentes
-                </p>
-                <ul className="space-y-2 text-sm">
-                  {data.sources.map((s, i) => (
-                    <li key={s.id ?? `${s.title}-${i}`} className="rounded-lg border bg-muted/20 px-3 py-2">
-                      {s.url ? (
-                        <a href={s.url} className="font-medium text-primary hover:underline" target="_blank" rel="noreferrer">
-                          {s.title}
-                        </a>
-                      ) : (
-                        <span className="font-medium">{s.title}</span>
-                      )}
-                      {s.snippet ? <p className="mt-1 text-muted-foreground">{s.snippet}</p> : null}
-                    </li>
-                  ))}
-                </ul>
               </div>
             </>
           ) : null}
