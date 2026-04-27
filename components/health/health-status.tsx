@@ -120,16 +120,19 @@ export function HealthStatus() {
                   isLikelyNetworkOrCors(getErrorMessage(error)) ? (
                     <ul className="list-inside list-disc text-xs space-y-1 text-muted-foreground">
                       <li>
-                        <code className="font-mono text-foreground">NEXT_PUBLIC_API_URL</code> debe
-                        apuntar al <strong className="text-foreground">backend</strong> (p. ej.{" "}
-                        <code className="font-mono text-foreground">:8000</code>), no al servidor de
-                        Next (<code className="font-mono text-foreground">:3000</code>).
+                        Las peticiones van al BFF{" "}
+                        <code className="font-mono text-foreground">/api/petmind</code>; Next llama al
+                        FastAPI usando{" "}
+                        <code className="font-mono text-foreground">NEXT_PUBLIC_API_BASE_URL</code> en el{" "}
+                        <strong className="text-foreground">servidor</strong>. Debe ser alcanzable desde el
+                        hosting (no uses <code className="font-mono text-foreground">localhost</code> del
+                        portátil en Vercel).
                       </li>
                       <li>
-                        Con <code className="font-mono text-foreground">NEXT_PUBLIC_API_PROXY=true</code>{" "}
-                        el navegador usa <code className="font-mono text-foreground">/petmind-api</code>{" "}
-                        (misma origen) y se evita CORS; reinicia <code className="font-mono text-foreground">npm run dev</code> tras cambiar{" "}
-                        <code className="font-mono text-foreground">next.config.ts</code> o variables.
+                        Tras cambiar variables en producción, hace falta un{" "}
+                        <strong className="text-foreground">nuevo deploy</strong> (las{" "}
+                        <code className="font-mono text-foreground">NEXT_PUBLIC_*</code> se inyectan en
+                        build).
                       </li>
                     </ul>
                   ) : (

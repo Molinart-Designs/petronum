@@ -18,7 +18,7 @@ Copia `.env.local.example` a `.env.local` y rellena valores reales.
 
 **Públicas (`NEXT_PUBLIC_*`)**: dominio Auth0, client ID, audience, URL base del API (referencia en UI).
 
-**Solo servidor**: `AUTH0_CLIENT_SECRET`, `AUTH0_SECRET`. No uses el prefijo `NEXT_PUBLIC_` en secretos.
+**Solo servidor**: `AUTH0_CLIENT_SECRET`, `AUTH0_SECRET`, `PETMIND_BACKEND_API_KEY` (la misma clave que valida FastAPI en `X-API-Key`; el BFF la envía al upstream, nunca al navegador). No uses el prefijo `NEXT_PUBLIC_` en secretos.
 
 **Auth0 Dashboard** (desarrollo): añade `http://localhost:3000/auth/callback` en *Allowed Callback URLs* y `http://localhost:3000` en *Allowed Logout URLs*.
 

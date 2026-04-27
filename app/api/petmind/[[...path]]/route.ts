@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { auth0 } from "@/lib/auth0";
 import { isAdminUser } from "@/lib/auth/roles";
-import { getBackendBaseUrl } from "@/lib/server-env";
+import { getBackendBaseUrl, withBackendApiKey } from "@/lib/server-env";
 
 const BFF_PREFIX = "/api/petmind";
 
@@ -31,7 +31,7 @@ function appendSetCookies(from: NextResponse, onto: NextResponse): void {
 async function forwardPublicGet(req: NextRequest, pathname: string, search: string): Promise<NextResponse> {
   const upstream = await fetch(upstreamUrl(pathname, search), {
     method: "GET",
-    headers: { Accept: "application/json" },
+    headers: withBackendApiKey({ Accept: "application/json" }),
     cache: "no-store",
   });
   const out = new NextResponse(upstream.body, {
@@ -74,11 +74,11 @@ async function forwardAuthenticatedPost(
 
   const upstream = await fetch(upstreamUrl(pathname, search), {
     method: "POST",
-    headers: {
+    headers: withBackendApiKey({
       Accept: "application/json",
       "Content-Type": req.headers.get("content-type") ?? "application/json",
       Authorization: `Bearer ${token}`,
-    },
+    }),
     body: rawBody.length ? rawBody : undefined,
     cache: "no-store",
   });
